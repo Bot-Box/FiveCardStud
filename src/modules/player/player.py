@@ -2,14 +2,14 @@
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, player_id=1):
         """
-        player module
+        Basic player module
         :param self:
         :return:
         """
         self.name = "Default Player"
-        self.player_number = 0
+        self.player_id = player_id
 
     def set_name(self, new_name):
         self.name = new_name
@@ -17,9 +17,9 @@ class Player:
     def get_name(self):
         return self.name
 
-    def set_player_number(self, new_number):
-        self.player_number = new_number
+    def set_player_id(self, new_id):
+        self.player_id = new_id
 
-    def get_number(self):
-        return self.player_number
+    def get_player_id(self):
+        return self.player_id
 

@@ -1,3 +1,6 @@
-from src.modules.deuces import Card
+from src.modules.player.five_card_stud_player import FiveCardStudPlayer
 
-Card.get_prime(12)
+
+player1 = FiveCardStudPlayer(1)
+
+print(player1.get_player_id())

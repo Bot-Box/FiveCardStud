@@ -1,2 +1,2 @@
-# FiveCardStud
-Simple Game: Five Card Stud
+# Bot-Box-Platform
+Support Games: Five Card Stud

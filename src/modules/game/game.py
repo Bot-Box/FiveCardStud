@@ -4,7 +4,6 @@ from src.modules.deuces import Deck
 class Game:
     def __init__(self):
         self.game_number = 0
-        self.decks = []
         self.game_name = "Game"
 
     def set_game_numer(self, new_number):

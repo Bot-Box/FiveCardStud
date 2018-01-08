@@ -28,7 +28,7 @@ class FiveCardStud(Game):
         }
 
     def new_game(self, number_of_player):
-        self.decks = Deck()
+        self.deck = Deck()
         for i in range(number_of_player):
             self.players[i] = FiveCardStudPlayer(i)
 
@@ -53,7 +53,10 @@ class FiveCardStud(Game):
         round = 0
         attend_players = []
         for i in range(len(self.players)):
+            player = self.players.get(i)
+            player.add_to_hand(self.deck.draw(2))
             attend_players.append(self.players.get(i))
+
         current_pos = randint(0, len(attend_players) - 1)
         if len(attend_players) < 2:
             print("No enough players, Only %d playes attend" % len(attend_players) )
@@ -64,7 +67,7 @@ class FiveCardStud(Game):
             self.to_play = attend_players
             cmd = input("input command to play (currnet player: %d): " % self.current_player.get_player_id())
 
-    def new_round(self):
+    def round(self, start_pos):
         pass
 
     def call(self):

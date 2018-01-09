@@ -6,9 +6,9 @@ class MoneyPool:
     def add(self, amount, player_id):
         self.total_money += amount
         if not self.money.get(player_id, None):
-            self.money[player_id] = amount
+            self.money[player_id] = [amount]
         else:
-            self.money[player_id] += amount
+            self.money[player_id].append(amount)
 
     def get(self, player_id):
         return self.money.get(player_id, 0)

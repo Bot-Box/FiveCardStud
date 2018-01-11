@@ -15,14 +15,33 @@ dict1[0] += 1
 # print(dict1[0])
 
 
-def round(attend_players, start_pos):
-    round_players = attend_players[:]
-    for i in range(len(round_players)):
-        yield round_players[start_pos]
-        start_pos -= 1
+raise_count = [x[:] for x in [[False] * 3] * 6]
+print(raise_count)
+round_count = 3
 
 
-a = [1, 2, 3, 4, 5]
+def round(alive_players):
+    round_players = alive_players[:]
+    pos = 0
+    count = 0
+
+    while count < len(round_players):
+        count += 1
+        if raise_count[round_count][round_players[pos].get_player_id()]:
+            return
+        if not round_players[pos].get_give_up():
+            yield round_players[pos]
+            if raise_count[round_count][round_players[pos].get_player_id()]:
+                count = 1
+                pos = round_players.index(round_players[pos])
+        pos -= 1
+
+a = [FiveCardStudPlayer(1), FiveCardStudPlayer(2)]
+
+
+for player in round(a):
+    raise_count[3][player.get_player_id()] = True
+    print(player.get_player_id())
 
 # for i in round(a, 2):
     # print(i)
@@ -91,6 +110,11 @@ evaluator = Evaluator()
 print(evaluator.evaluate(hand1, []))
 print(evaluator.evaluate(hand2, []))
 
-game = FiveCardStud()
-game.new_game(2)
-game.play()
+
+# a = [1,2,3,4]
+
+# print(a[-7])
+
+# game = FiveCardStud()
+# game.new_game(2)
+# game.play()

@@ -94,6 +94,10 @@ class FiveCardStud(Game):
         exit(0)
 
     def round(self):
+        """
+        A generator to assign the player for each play round
+        :return:
+        """
         round_players = self.alive_players[:]
         pos = self.find_high_card_player().get_player_id()
         self.last_raised_player = None
@@ -130,18 +134,7 @@ class FiveCardStud(Game):
             return False
         amount = int(input("please input amount for raise"))
         to_bet = amount + self.current_bet
-        if to_bet > self.to_play.get_carry_money():
-            print("You cannot bet that much, you want to bet %d but you only have %d!" % (to_bet, self.to_play.get_carry_money()))
-            return False
-        elif self.to_play.get_raised():
-            print("You already raised, you only can do call or fold")
-            return False
-        else:
-            self.to_play.set_raised(True)
-            self.money_pool.add(self.to_play.withdraw_money(to_bet), self.to_play.get_player_id())
-            self.current_bet = to_bet
-            self.last_raised_player = self.to_play.get_player_id()
-            return True
+        return self._bet(to_bet)
 
     def _fold_cmd(self):
         self.to_play.set_give_up(True)
@@ -160,21 +153,8 @@ class FiveCardStud(Game):
         if self.to_play.get_raised():
             print("You already raised, please use call or fold")
             return False
-        amount = int(input("please input amount for bet"))
-        to_bet = amount
-        if to_bet > self.to_play.get_carry_money():
-            print("You cannot bet that much, you want to bet %d but you only have %d!" % (
-            to_bet, self.to_play.get_carry_money()))
-            return False
-        elif self.to_play.get_raised():
-            print("You already raised, you only can do call or fold")
-            return False
-        else:
-            self.to_play.set_raised(True)
-            self.money_pool.add(self.to_play.withdraw_money(to_bet), self.to_play.get_player_id())
-            self.current_bet = to_bet
-            self.last_raised_player = self.to_play.get_player_id()
-            return True
+        to_bet = int(input("please input amount for bet"))
+        return self._bet(to_bet)
 
     def _showhand_cmd(self):
         pass
@@ -190,7 +170,25 @@ class FiveCardStud(Game):
             print("---------")
         return False
 
-
+    def _bet(self, to_bet):
+        """
+        Bet amount of money from the current player to the pool
+        :param to_bet:
+        :return:
+        """
+        if to_bet > self.to_play.get_carry_money():
+            print("You cannot bet that much, you want to bet %d but you only have %d!" % (
+            to_bet, self.to_play.get_carry_money()))
+            return False
+        elif self.to_play.get_raised():
+            print("You already raised, you only can do call or fold")
+            return False
+        else:
+            self.to_play.set_raised(True)
+            self.money_pool.add(self.to_play.withdraw_money(to_bet), self.to_play.get_player_id())
+            self.current_bet = to_bet
+            self.last_raised_player = self.to_play.get_player_id()
+            return True
 
     def is_greater_than(self, card1, card2):
         """
@@ -205,11 +203,7 @@ class FiveCardStud(Game):
         suit2 = Card.get_suit_int(card2)
 
         if prime1 == prime2:
-            if suit1 == suit2:
-                # print("Two cards are equal")
-                return False
-            else:
-                return True if suit1 < suit2 else False
+            return True if suit1 < suit2 else False
         else:
             return True if prime1 > prime2 else False
 

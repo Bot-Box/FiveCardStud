@@ -21,3 +21,6 @@ class MoneyPool:
         money = self.total_money
         self.clear()
         return money
+
+    def get_total_money(self):
+        return self.total_money

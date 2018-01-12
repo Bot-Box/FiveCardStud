@@ -7,7 +7,7 @@ class FiveCardStudPlayer(Player):
     """
     def __init__(self, player_id):
         super().__init__(player_id)
-        self.carry_money = 1000
+        self.carry_money = 100
         self.hand = []
         self.is_give_up = False
         self.raised = False
@@ -21,7 +21,7 @@ class FiveCardStudPlayer(Player):
             return 0
         else:
             self.carry_money -= amount
-            return self.carry_money
+            return amount
 
     def get_carry_money(self):
         return self.carry_money

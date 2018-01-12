@@ -17,7 +17,7 @@ class FiveCardStud(Game):
         self.to_play = None
         self.current_bet = 0
         self.round_count = 0
-        self.raise_count = [x[:] for x in [[False] * (self.player_limit + 1)] * 6]
+        self.last_raised_player = None
         self.money_pool = MoneyPool()
         self.alive_players = []
         self.commands = {
@@ -27,6 +27,7 @@ class FiveCardStud(Game):
             "check": self._check_cmd,
             "bet": self._bet_cmd,
             "showhand": self._showhand_cmd,
+            "info": self._info_cmd,
         }
 
     def new_game(self, number_of_player):
@@ -37,7 +38,7 @@ class FiveCardStud(Game):
         self.alive_players.clear()
         self.money_pool = MoneyPool()
         self.round_count = 0
-        self.raise_count = [x[:] for x in [[False] * (self.player_limit + 1)] * 6]
+        self.last_raised_player = None
 
     def add_player(self):
         # add new player into spare spot
@@ -67,87 +68,126 @@ class FiveCardStud(Game):
 
         # draw one card for each player before start
         self.draw_cards(1)
-        while len(self.alive_players) > 1 and self.round_count < 5:
+
+        # continue game if there are more than one player in the game and player has
+        while len(self.alive_players) > 1 and self.round_count < 4:
             self.round_count += 1
             self.remove_giveup_players()
             self.draw_cards(1)
             for self.to_play in self.round():
-                cmd= input("input command to play (currnet player: %d) and amount if needed: "
-                           % self.to_play.get_player_id())
-                self.commands.get(cmd, self._default_cmd)()
+                while True:
+                    cmd = input("input command to play (currnet player: %d) and amount if needed: "
+                                % self.to_play.get_player_id())
+                    if self.commands.get(cmd, self._default_cmd)():
+                        break
 
         # Evaluate all alive players cards, find the winner
-        if self.round_count < 5 and len(self.alive_players) == 1:
+        if self.round_count < 4 and len(self.alive_players) == 1:
             winner = self.alive_players[0]
-        elif self.round_count == 5 and len(self.alive_players) > 1:
+        elif self.round_count == 4 and len(self.alive_players) > 1:
             winner = self.find_winner()
         else:
             print("Cannot find a winner for this game, ")
         if winner:
-            print(winner.get_player_id())
+            print("Winner is: %d" % winner.get_player_id())
         exit(0)
 
     def round(self):
         round_players = self.alive_players[:]
         pos = self.find_high_card_player().get_player_id()
-        count = 0
+        self.last_raised_player = None
+        give_up_count = 0
 
+        count = 0
         while count < len(round_players):
             count += 1
-            if self.raise_count[self.round_count][round_players[pos].get_player_id]:
-                return
-            if not round_players[pos].get_give_up():
-                yield round_players[pos]
-                if self.raise_count[self.round_count][round_players[pos].get_player_id]:
+            player = round_players[pos]
+            # If this player didn't give up, let it choose actions
+            if not player.get_give_up():
+                yield player
+                if player.get_give_up():
+                    give_up_count += 1
+                    # Check if there is only one player alive
+                    if give_up_count == len(round_players) - 1:
+                        return
+                # After this player action, if he is the last player raise then reset the count
+                if self.last_raised_player == player.get_player_id():
                     count = 1
-                    pos = round_players.index(round_players[pos])
+                    pos = round_players.index(player)
             pos -= 1
 
-
-        # for i in range(len(round_players)):
-        #     if not round_players[i].get_give_up():
-        #         yield round_players[pos]
-        #     pos -= 1
-
-    def _call_cmd(self, _):
-        if self.current_bet == 0:
-            return True
-        else:
-            print("cannot call if other players bet something")
+    def _check_cmd(self):
+        if self.current_bet != 0:
+            print("cannot check if other players bet something")
             return False
+        else:
+            return True
 
     def _raise_cmd(self):
+        if self.to_play.get_raised():
+            print("You already raised, please use call or fold")
+            return False
         amount = int(input("please input amount for raise"))
         to_bet = amount + self.current_bet
         if to_bet > self.to_play.get_carry_money():
             print("You cannot bet that much, you want to bet %d but you only have %d!" % (to_bet, self.to_play.get_carry_money()))
             return False
+        elif self.to_play.get_raised():
+            print("You already raised, you only can do call or fold")
+            return False
         else:
             self.money_pool.add(self.to_play.withdraw_money(to_bet), self.to_play.get_player_id())
             self.current_bet = to_bet
+            self.last_raised_player = self.to_play.get_player_id()
             return True
 
     def _fold_cmd(self):
         self.to_play.set_give_up(True)
         return True
 
-    def _check_cmd(self):
+    def _call_cmd(self):
         to_bet = self.current_bet
         if to_bet > self.to_play.get_carry_money():
-            print("You cannot check, you only have %d!" % self.to_play.get_carry_money())
+            print("You cannot call, you only have %d!" % self.to_play.get_carry_money())
             return False
         else:
             self.money_pool.add(self.to_play.withdraw_money(to_bet), self.to_play.get_player_id())
             return True
 
-    def _bet_cmd(self, player, amount):
+    def _bet_cmd(self):
+        if self.to_play.get_raised():
+            print("You already raised, please use call or fold")
+            return False
+        amount = int(input("please input amount for bet"))
+        to_bet = amount
+        if to_bet > self.to_play.get_carry_money():
+            print("You cannot bet that much, you want to bet %d but you only have %d!" % (
+            to_bet, self.to_play.get_carry_money()))
+            return False
+        elif self.to_play.get_raised():
+            print("You already raised, you only can do call or fold")
+            return False
+        else:
+            self.money_pool.add(self.to_play.withdraw_money(to_bet), self.to_play.get_player_id())
+            self.current_bet = to_bet
+            self.last_raised_player = self.to_play.get_player_id()
+            return True
+
+    def _showhand_cmd(self):
         pass
 
-    def _showhand_cmd(self, player, amount):
-        pass
-
-    def _default_cmd(self, player):
+    def _default_cmd(self):
         print("Unknow command!")
+
+    def _info_cmd(self):
+        print("Money pool has: %d" % self.money_pool.get_total_money())
+        for _, player in self.players.items():
+            print("Player: %d, Carry money: %d, hand:" % (player.get_player_id(), player.get_carry_money()))
+            Card.print_pretty_cards(player.get_hand())
+            print("---------")
+        return False
+
+
 
     def is_greater_than(self, card1, card2):
         """
@@ -205,7 +245,7 @@ class FiveCardStud(Game):
             winner = self.alive_players[0]
             evaluator = Evaluator()
             for player in self.alive_players:
-                if evaluator.evaluate(player.get_hand, []) < evaluator.evaluate(winner.get_hand, []):
+                if evaluator.evaluate(player.get_hand(), []) < evaluator.evaluate(winner.get_hand(), []):
                     winner = player
             return winner
 

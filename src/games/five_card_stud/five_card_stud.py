@@ -74,9 +74,10 @@ class FiveCardStud(Game):
             self.round_count += 1
             self.remove_giveup_players()
             self.draw_cards(1)
+            self.current_bet = 0
             for self.to_play in self.round():
                 while True:
-                    cmd = input("input command to play (currnet player: %d) and amount if needed: "
+                    cmd = input("input command to play (currnet player: %d): "
                                 % self.to_play.get_player_id())
                     if self.commands.get(cmd, self._default_cmd)():
                         break

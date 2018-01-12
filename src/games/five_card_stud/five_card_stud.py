@@ -137,6 +137,7 @@ class FiveCardStud(Game):
             print("You already raised, you only can do call or fold")
             return False
         else:
+            self.to_play.set_raised(True)
             self.money_pool.add(self.to_play.withdraw_money(to_bet), self.to_play.get_player_id())
             self.current_bet = to_bet
             self.last_raised_player = self.to_play.get_player_id()
@@ -169,6 +170,7 @@ class FiveCardStud(Game):
             print("You already raised, you only can do call or fold")
             return False
         else:
+            self.to_play.set_raised(True)
             self.money_pool.add(self.to_play.withdraw_money(to_bet), self.to_play.get_player_id())
             self.current_bet = to_bet
             self.last_raised_player = self.to_play.get_player_id()

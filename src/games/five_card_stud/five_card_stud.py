@@ -111,7 +111,7 @@ class FiveCardStud(Game):
                     # Check if there is only one player alive
                     if give_up_count == len(round_players) - 1:
                         return
-                # After this player action, if he is the last player raise then reset the count
+                # After this player action, if he is the last player raised bet, then reset the count
                 if self.last_raised_player == player.get_player_id():
                     count = 1
                     pos = round_players.index(player)

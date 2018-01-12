@@ -72,7 +72,6 @@ class FiveCardStud(Game):
         # continue game if there are more than one player in the game and player has
         while len(self.alive_players) > 1 and self.round_count < 4:
             self.round_count += 1
-            self.remove_giveup_players()
             self.draw_cards(1)
             self.current_bet = 0
             for self.to_play in self.round():
@@ -81,6 +80,7 @@ class FiveCardStud(Game):
                                 % self.to_play.get_player_id())
                     if self.commands.get(cmd, self._default_cmd)():
                         break
+            self.remove_gaveup_players()
 
         # Evaluate all alive players cards, find the winner
         if self.round_count < 4 and len(self.alive_players) == 1:
@@ -204,7 +204,7 @@ class FiveCardStud(Game):
 
         if prime1 == prime2:
             if suit1 == suit2:
-                print("Two cards are equal")
+                # print("Two cards are equal")
                 return False
             else:
                 return True if suit1 < suit2 else False
@@ -221,7 +221,7 @@ class FiveCardStud(Game):
             return None
         high_card_player = self.alive_players[0]
         for player in self.alive_players:
-            if self.is_greater_than(player.get_hand()[-1], high_card_player.get_hand()[-1]):
+            if not player.get_give_up() and self.is_greater_than(player.get_hand()[-1], high_card_player.get_hand()[-1]):
                 high_card_player = player
         return high_card_player
 
@@ -250,7 +250,7 @@ class FiveCardStud(Game):
                     winner = player
             return winner
 
-    def remove_giveup_players(self):
+    def remove_gaveup_players(self):
         alive_players = []
         for player in self.alive_players:
             if not player.get_give_up():

@@ -7,7 +7,6 @@ from src.modules.game.money_pool import MoneyPool
 
 
 class FiveCardStud(Game):
-
     def __init__(self, player_limit=2):
         super().__init__()
         self.game_name = "Five Card Stud"
@@ -15,7 +14,7 @@ class FiveCardStud(Game):
         self.players = {}
         self.player_limit = player_limit
         self.to_play = None
-        self.current_bet = 0
+        self.current_bet = 0  # current bet for each round
         self.round_count = 0
         self.last_raised_player = None
         self.money_pool = MoneyPool()
@@ -57,6 +56,10 @@ class FiveCardStud(Game):
             print("Cannot remove player, id: %d player doesn't exist" % player_id)
 
     def play(self):
+        """
+        The main flow of one game
+        :return:
+        """
         winner = None
         for i in range(len(self.players)):
             self.alive_players.append(self.players.get(i))
@@ -174,7 +177,7 @@ class FiveCardStud(Game):
         """
         Bet amount of money from the current player to the pool
         :param to_bet:
-        :return:
+        :return: True if bet successfully, otherwise False
         """
         if to_bet > self.to_play.get_carry_money():
             print("You cannot bet that much, you want to bet %d but you only have %d!" % (
@@ -247,6 +250,10 @@ class FiveCardStud(Game):
             return winner
 
     def remove_gaveup_players(self):
+        """
+        After each round, check all players, if they gave up in this round, remove them from the alive players list
+        :return:
+        """
         alive_players = []
         for player in self.alive_players:
             if not player.get_give_up():
